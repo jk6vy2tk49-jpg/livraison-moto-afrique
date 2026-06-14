@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi en Temps Réel - Livraison Moto Afrique</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .tracking-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .search-section {
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-search {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .status-timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .status-item {
+            display: flex;
+            margin-bottom: 30px;
+            position: relative;
+            animation: slideIn 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .status-item:nth-child(1) { animation-delay: 0.1s; }
+        .status-item:nth-child(2) { animation-delay: 0.2s; }
+        .status-item:nth-child(3) { animation-delay: 0.3s; }
+        .status-item:nth-child(4) { animation-delay: 0.4s; }
+
+        .status-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .status-item.active .status-icon {
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-item.completed .status-icon {
+            background: linear-gradient(135deg, #00c853 0%, #00a838 100%);
+        }
+
+        .status-line {
+            position: absolute;
+            left: 30px;
+            top: 60px;
+            width: 2px;
+            height: calc(100% + 30px);
+            background: #e0e0e0;
+            z-index: 1;
+        }
+
+        .status-item.completed .status-line {
+            background: linear-gradient(180deg, #00c853 0%, #e0e0e0 100%);
+        }
+
+        .status-content {
+            margin-left: 30px;
+            flex: 1;
+        }
+
+        .status-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .status-time {
+            color: #999;
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+        }
+
+        .status-description {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .tracking-info {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .info-box {
+            text-align: center;
+        }
+
+        .info-label {
+            color: #999;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .driver-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 25px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .driver-avatar {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .driver-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .driver-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .driver-contact {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .driver-contact a {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .driver-contact a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .map-section {
+            margin-top: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: 300px;
+        }
+
+        .map-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #999;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+            50% {
+                box-shadow: 0 4px 25px rgba(102, 126, 234, 0.6);
+            }
+        }
+
+        .demo-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+
+        .demo-section p {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .demo-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+
+        .demo-button:hover {
+            background: #764ba2;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .tracking-card {
+                padding: 20px;
+            }
+
+            .driver-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-box input {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏍️ Livraison Moto Afrique</h1>
+            <p>Suivi en Temps Réel de Votre Commande</p>
+        </div>
+
+        <div class="tracking-card">
+            <div class="search-section">
+                <h2 style="margin-bottom: 15px; color: #333;">Suivi Votre Commande</h2>
+                <div class="search-box">
+                    <input type="text" id="trackingInput" placeholder="Entrez votre numéro de commande (ex: CMD-2024-001)" value="CMD-2024-001">
+                    <button class="btn-search" onclick="searchTracking()">Rechercher</button>
+                </div>
+            </div>
+
+            <div class="status-timeline" id="timeline">
+                <!-- Sera rempli par JavaScript -->
+            </div>
+
+            <div class="tracking-info">
+                <div class="info-box">
+                    <div class="info-label">Commande</div>
+                    <div class="info-value" id="orderNumber">CMD-2024-001</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Statut</div>
+                    <div class="info-value" id="orderStatus">En Livraison</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Date de Livraison</div>
+                    <div class="info-value" id="deliveryDate">Aujourd'hui</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Distance Restante</div>
+                    <div class="info-value" id="distance">2.5 km</div>
+                </div>
+            </div>
+
+            <div class="driver-section">
+                <div class="driver-avatar">🧑‍🦱</div>
+                <div class="driver-info">
+                    <div class="driver-name" id="driverName">Abdoulaye Sow</div>
+                    <p style="margin: 5px 0; opacity: 0.9;">Livreur Professionnel</p>
+                    <div class="driver-contact">
+                        <a href="tel:+221771234567">📞 +221 77 123 45 67</a>
+                        <a href="whatsapp://send?phone=221771234567">💬 WhatsApp</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-section">
+                <div class="map-placeholder">📍</div>
+            </div>
+
+            <div class="demo-section">
+                <p><strong>🎯 Mode Démo:</strong> Cliquez ci-dessous pour voir différents états de livraison</p>
+                <button class="demo-button" onclick="setStatus('pending')">Commande Confirmée</button>
+                <button class="demo-button" onclick="setStatus('prepared')">Préparée</button>
+                <button class="demo-button" onclick="setStatus('pickup')">En Préparation au Départ</button>
+                <button class="demo-button" onclick="setStatus('delivery')">En Livraison</button>
+                <button class="demo-button" onclick="setStatus('completed')">Livrée ✓</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const statuses = {
+            pending: {
+                steps: [
+                    { icon: '✓', title: 'Commande Confirmée', time: 'Aujourd\'hui 10:30', description: 'Votre commande a été confirmée' },
+                    { icon: '⏳', title: 'En Préparation', time: 'En cours...', description: 'Notre équipe prépare votre colis' },
+                    { icon: '⭕', title: 'En Attente de Livraison', time: 'À venir', description: 'Le livreur viendra chercher votre colis' },
+                    { icon: '⭕', title: 'Livrée', time: 'À venir', description: 'Votre colis vous sera livré' }
+                ],
+                orderStatus: 'En Préparation',
+                distance: 'En attente'
+            },
+            prepared: {
+                steps: [
+                    { icon: '✓', title: 'Commande Confirmée', time: 'Aujourd\'hui 10:30', description: 'Votre commande a été confirmée' },
+                    { icon: '✓', title: 'Colis Préparé', time: 'Aujourd\'hui 11:45', description: 'Votre colis a été préparé et emballé' },
+                    { icon: '⏳', title: 'En Attente de Départ', time: 'En cours...', description: 'Le livreur viendra chercher votre colis' },
+                    { icon: '⭕', title: 'Livrée', time: 'À venir', description: 'Votre colis vous sera livré' }
+                ],
+                orderStatus: 'Colis Préparé',
+                distance: 'En attente'
+            },
+            pickup: {
+                steps: [
+                    { icon: '✓', title: 'Commande Confirmée', time: 'Aujourd\'hui 10:30', description: 'Votre commande a été confirmée' },
+                    { icon: '✓', title: 'Colis Préparé', time: 'Aujourd\'hui 11:45', description: 'Votre colis a été préparé et emballé' },
+                    { icon: '✓', title: 'En Préparation au Départ', time: 'Aujourd\'hui 13:20', description: 'Le livreur est en route pour chercher votre colis' },
+                    { icon: '⭕', title: 'Livrée', time: 'À venir', description: 'Votre colis vous sera livré' }
+                ],
+                orderStatus: 'En Préparation au Départ',
+                distance: '5 km'
+            },
+            delivery: {
+                steps: [
+                    { icon: '✓', title: 'Commande Confirmée', time: 'Aujourd\'hui 10:30', description: 'Votre commande a été confirmée' },
+                    { icon: '✓', title: 'Colis Préparé', time: 'Aujourd\'hui 11:45', description: 'Votre colis a été préparé et emballé' },
+                    { icon: '✓', title: 'Récupéré', time: 'Aujourd\'hui 13:50', description: 'Le colis a été récupéré par notre livreur' },
+                    { icon: '🏍️', title: 'En Livraison', time: 'Maintenant', description: 'Votre colis est en route vers vous' }
+                ],
+                orderStatus: 'En Livraison',
+                distance: '2.5 km'
+            },
+            completed: {
+                steps: [
+                    { icon: '✓', title: 'Commande Confirmée', time: 'Aujourd\'hui 10:30', description: 'Votre commande a été confirmée' },
+                    { icon: '✓', title: 'Colis Préparé', time: 'Aujourd\'hui 11:45', description: 'Votre colis a été préparé et emballé' },
+                    { icon: '✓', title: 'Récupéré', time: 'Aujourd\'hui 13:50', description: 'Le colis a été récupéré par notre livreur' },
+                    { icon: '✓', title: 'Livrée avec Succès', time: 'Aujourd\'hui 15:30', description: 'Votre colis a été livré avec succès' }
+                ],
+                orderStatus: 'Livrée ✓',
+                distance: '0 km'
+            }
+        };
+
+        function renderTimeline(status) {
+            const timeline = document.getElementById('timeline');
+            const data = statuses[status];
+            
+            timeline.innerHTML = '';
+            
+            data.steps.forEach((step, index) => {
+                const isCompleted = index <= (status === 'completed' ? 3 : status === 'delivery' ? 3 : status === 'pickup' ? 2 : status === 'prepared' ? 1 : 0);
+                const isActive = index === (status === 'completed' ? 3 : status === 'delivery' ? 3 : status === 'pickup' ? 2 : status === 'prepared' ? 1 : 0);
+                
+                const item = document.createElement('div');
+                item.className = `status-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`;
+                
+                const showLine = index < data.steps.length - 1;
+                
+                item.innerHTML = `
+                    <div class="status-icon">${step.icon}</div>
+                    ${showLine ? '<div class="status-line"></div>' : ''}
+                    <div class="status-content">
+                        <div class="status-title">${step.title}</div>
+                        <div class="status-time">${step.time}</div>
+                        <div class="status-description">${step.description}</div>
+                    </div>
+                `;
+                
+                timeline.appendChild(item);
+            });
+            
+            document.getElementById('orderStatus').textContent = data.orderStatus;
+            document.getElementById('distance').textContent = data.distance;
+        }
+
+        function setStatus(status) {
+            renderTimeline(status);
+            
+            // Ajouter une petit animation
+            document.getElementById('timeline').style.opacity = '0';
+            setTimeout(() => {
+                renderTimeline(status);
+                document.getElementById('timeline').style.opacity = '1';
+            }, 200);
+        }
+
+        function searchTracking() {
+            const input = document.getElementById('trackingInput').value;
+            if (input.trim()) {
+                document.getElementById('orderNumber').textContent = input;
+                alert('Commande ' + input + ' trouvée! Mode démo activé.');
+                setStatus('delivery');
+            }
+        }
+
+        // Initialisation
+        renderTimeline('delivery');
+
+        // Simulation du mouvement (optionnel)
+        let distance = 2.5;
+        setInterval(() => {
+            if (distance > 0.1) {
+                distance -= 0.1;
+                document.getElementById('distance').textContent = distance.toFixed(1) + ' km';
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
+
+
+
